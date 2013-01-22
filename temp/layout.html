@@ -1,52 +1,20 @@
+$def with (content)
 <!DOCTYPE html>
 <html>
 <head>
-	<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 	<!-- <link rel="stylesheet" href="css.css" type="text/css" /> -->
 	<script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
-	<script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="zp.js"></script>
-	<script type="text/javascript" src="panel.js"></script>
+	<script type="text/javascript" src="/static/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/static/zp.js"></script>
+	<script type="text/javascript" src="/static/panel.js"></script>
+	<title>EFT Online</title>
 	<script>
-	var maxZ = 1;
-	$(function()
+	var jq = jQuery.noConflict();
+	jq(function()
 	{
-		$("#mi_zp").click(function(){
-			var $zp = $("#zp-list");
-			if(!$zp.attr('id'))
-			{
-				var p = panel(
-					{
-						title:'选择舰船',
-						url:'/getShips'
-					}
-				);			
-			}
-			else
-			{
-				$zp.show();	
-			}
-		});
-		
-		$("#mi_market").click(function(){
-			var $mk = $("#market-list");
-			if(!$mk.attr('id'))
-			{
-				var p = market(
-					{
-						title:'市场',
-						id:'market-list',
-						url:'/getTypes'
-					}
-				);			
-			}
-			else
-			{
-				$mk.show();	
-			}
-		});
-
-		$("#loginTgr").popover({
+		jq("#loginTgr").popover({
 			title:"登录", 
 			html:true,
 			content:'<form>'+
@@ -65,17 +33,18 @@
 					'</form>',
 			placement:"bottom"
 		});
+		jq('.dropdown-toggle').dropdown();
 	});
 
 	function login(){
-		var email = $("#email").val();
-		var passwd = $("#passwd").val();
-		var auto = $("#auto").is(':checked');
+		var email = jq("#email").val();
+		var passwd = jq("#passwd").val();
+		var auto = jq("#auto").is(':checked');
 		if(email == null || email == '' || passwd == null || passwd == ''){
-			$("#loginTgr").popover('hide');
+			jq("#loginTgr").popover('hide');
 			return;
 		}
-		$.ajax({
+		jq.ajax({
 			url:'/login',
 			type:'POST',
 			dataType:'json',
@@ -86,14 +55,14 @@
 			},
 			success:function(resp){
 				var data = eval('('+resp+')');
-				$("#loginTgr").popover('hide');
-				$("#alertContent").empty().append(data.succ?"登录成功":data.msg);
-				$("#alertDlg").addClass(data.succ?"alert-success":"alert-error").show();
+				jq("#loginTgr").popover('hide');
+				jq("#alertContent").empty().append(data.succ?"登录成功":data.msg);
+				jq("#alertDlg").addClass(data.succ?"alert-success":"alert-error").show();
 			},
 			error:function(resp){
-				$("#loginTgr").popover('hide');
-				$("#alertContent").empty().append("服务器出错,请稍后再试.");
-				$("#alertDlg").addClass("alert-error").show();				
+				jq("#loginTgr").popover('hide');
+				jq("#alertContent").empty().append("服务器出错,请稍后再试.");
+				jq("#alertDlg").addClass("alert-error").show();				
 			}
 		})
 
@@ -105,11 +74,17 @@
 	  <div class="navbar-inner">
 	  	<a class="brand" href="#">EFT Online</a>
 	    <ul class="nav">
-	      <li class="active"><a href="/"><i class="icon-home"></i>系统</a></li>
+	    	$if content.curr_page == 'index':
+	    		<li class="active"><a href="/"><i class="icon-home"></i>系统</a></li>
+	    	$else:
+	    		<li><a href="/"><i class="icon-home"></i>系统</a></li>
 	      <li class="divider-vertical"></li>
 	      <li><a href="#"><i class="icon-user"></i>人物</a></li>
 	      <li class="divider-vertical"></li>
-	      <li><a href="#"><i class="icon-briefcase"></i>装配</a></li>
+	    	$if content.curr_page == 'eft':
+	    		<li class="active"><a href="/eft"><i class="icon-briefcase"></i>装配</a></li>
+	    	$else:
+	    		<li><a href="/eft"><i class="icon-briefcase"></i>装配</a></li>
 	      <li class="divider-vertical"></li>
 	      <li><a href="#"><i class="icon-shopping-cart"></i>市场</a></li>
 	    </ul>
@@ -118,12 +93,13 @@
           <input type="text" class="search-query span4" placeholder="Search">
         </form>
         <ul class="nav pull-right">
-          <li><a href="#" id="loginTgr"><i class="icon-asterisk"></i>登录</a></li>
-	      <li class="divider-vertical"></li>
+          <!-- <li><a href="#" id="loginTgr"><i class="icon-asterisk"></i>登录</a></li> -->
+	      <!-- <li class="divider-vertical"></li> -->
 	      <li><a href="#about" data-toggle="modal"><i class="icon-question-sign"></i>关于</a></li>
         </ul>
 	  </div>
 	</div>
+	$:content
 	<!-- about dialog -->
 	<div id="about" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	  <div class="modal-header">
@@ -132,15 +108,14 @@
 	  </div>
 	  <div class="modal-body">
 	    <p>这是EVE装配工具在线版，方便游戏内进行分享和查看。</p>
-	    <p>有任何意见和问题，请发邮件<a href="mailto:viperasi@gmail.com">viperasi@gmail.com</a> 或 <a href="https://twitter.com/viperasi">@viperasi</a></p>
-	    <p>本系统使用bootstrap，web.py开发，使用GPL开源协议，代码请查看:<a href="https://github.com/viperasi/eftol">eftol on github</a></p>
+	    <p>有任何意见和问题，请发邮件<a href="mailto:viperasi@gmail.com">viperasi@gmail.com</a> 或 <a href="https://twitter.com/viperasi" target="_blank">@viperasi</a></p>
+	    <p>本系统使用bootstrap，web.py开发，使用GPL开源协议，代码请查看:<a href="https://github.com/viperasi/eftol" target="_blank">eftol on github</a></p>
 	  </div>
 	  <div class="modal-footer">
 	    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
 	  </div>
 	</div>
 	<!-- about dialog end -->
-
 	<!-- alert dialog -->
 	<div class="alert" id="alertDlg" style="display:none;">
 	  <button type="button" class="close" data-dismiss="alert">&times;</button>

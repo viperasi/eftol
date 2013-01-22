@@ -13,11 +13,15 @@ import web
 import simplejson
 from dbengine import DBEngine
 
-render = web.template.render('temp')
+render = web.template.render('temp/', base='layout')
 
 class index:
     def GET(self):
-        raise web.seeother('static/index.html')
+        return render.index()
+
+class eft:
+    def GET(self):
+        return render.eft()
 
 class getShips:
     def GET(self):

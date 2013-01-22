@@ -10,10 +10,11 @@
 # Licence:     <your licence>
 #-------------------------------------------------------------------------------
 import web
-from view import index, login, getShips, getItemData
+from view import index, eft, login, getShips, getItemData
 
 urls = (
     '/', 'index',
+    '/eft', 'eft',
     '/login', 'login',
     '/getShips', 'getShips',
     '/getItemData', 'getItemData'
