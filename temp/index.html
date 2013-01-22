@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="jquery-1.7.2.min.js"></script>
+<script>
+$(function(){
+	$.ajax({
+		url:'test',
+		dataType:'json',
+		type:'GET',
+		success:function(resp){
+			alert(resp);
+		}
+	});
+});
+</script>
+</head>
+<body>
+	test
+</body>
+</html>

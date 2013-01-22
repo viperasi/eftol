@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<!-- <link rel="stylesheet" href="css.css" type="text/css" /> -->
+	<script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+	<script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="zp.js"></script>
+	<script type="text/javascript" src="panel.js"></script>
+	<script>
+	var maxZ = 1;
+	$(function()
+	{
+		$("#mi_zp").click(function(){
+			var $zp = $("#zp-list");
+			if(!$zp.attr('id'))
+			{
+				var p = panel(
+					{
+						title:'选择舰船',
+						url:'/getShips'
+					}
+				);			
+			}
+			else
+			{
+				$zp.show();	
+			}
+		});
+		
+		$("#mi_market").click(function(){
+			var $mk = $("#market-list");
+			if(!$mk.attr('id'))
+			{
+				var p = market(
+					{
+						title:'市场',
+						id:'market-list',
+						url:'/getTypes'
+					}
+				);			
+			}
+			else
+			{
+				$mk.show();	
+			}
+		});
+
+		$("#loginTgr").popover({
+			title:"登录", 
+			html:true,
+			content:'<form>'+
+					  '<fieldset>'+
+					    '<label for="email">邮箱</label>'+
+					    '<input type="email" placeholder="example@example.com" name="email" id="email">'+
+					    '<label for="passwd">密码</label>'+
+					    '<input type="password" name="passwd" id="passwd">'+
+					    '<label class="checkbox">'+
+					      '<input type="checkbox" name="auto" id="auto">自动登陆'+
+					    '</label>'+
+					    '<button id="loginAction" type="button" onclick="login()" class="btn">登录</button>'+
+					    '<a href="#">忘记密码?</a>'+
+					    '<a href="#">还没有账号?</a>'+
+					  '</fieldset>'+
+					'</form>',
+			placement:"bottom"
+		});
+	});
+
+	function login(){
+		var email = $("#email").val();
+		var passwd = $("#passwd").val();
+		var auto = $("#auto").is(':checked');
+		if(email == null || email == '' || passwd == null || passwd == ''){
+			$("#loginTgr").popover('hide');
+			return;
+		}
+		$.ajax({
+			url:'/login',
+			type:'POST',
+			dataType:'json',
+			data:{
+				email: email,
+				passwd: passwd,
+				auto: auto
+			},
+			success:function(resp){
+				var data = eval('('+resp+')');
+				$("#loginTgr").popover('hide');
+				$("#alertContent").empty().append(data.succ?"登录成功":data.msg);
+				$("#alertDlg").addClass(data.succ?"alert-success":"alert-error").show();
+			},
+			error:function(resp){
+				$("#loginTgr").popover('hide');
+				$("#alertContent").empty().append("服务器出错,请稍后再试.");
+				$("#alertDlg").addClass("alert-error").show();				
+			}
+		})
+
+	}
+	</script>
+</head>
+<body>
+	<div class="navbar">
+	  <div class="navbar-inner">
+	  	<a class="brand" href="#">EFT Online</a>
+	    <ul class="nav">
+	      <li class="active"><a href="/"><i class="icon-home"></i>系统</a></li>
+	      <li class="divider-vertical"></li>
+	      <li><a href="#"><i class="icon-user"></i>人物</a></li>
+	      <li class="divider-vertical"></li>
+	      <li><a href="#"><i class="icon-briefcase"></i>装配</a></li>
+	      <li class="divider-vertical"></li>
+	      <li><a href="#"><i class="icon-shopping-cart"></i>市场</a></li>
+	    </ul>
+	    <form class="navbar-search pull-left" action="">
+	    	<i class="icon-search"></i>
+          <input type="text" class="search-query span4" placeholder="Search">
+        </form>
+        <ul class="nav pull-right">
+          <li><a href="#" id="loginTgr"><i class="icon-asterisk"></i>登录</a></li>
+	      <li class="divider-vertical"></li>
+	      <li><a href="#about" data-toggle="modal"><i class="icon-question-sign"></i>关于</a></li>
+        </ul>
+	  </div>
+	</div>
+	<!-- about dialog -->
+	<div id="about" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	  <div class="modal-header">
+	    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+	    <h3 id="myModalLabel">EFT Online</h3>
+	  </div>
+	  <div class="modal-body">
+	    <p>这是EVE装配工具在线版，方便游戏内进行分享和查看。</p>
+	    <p>有任何意见和问题，请发邮件<a href="mailto:viperasi@gmail.com">viperasi@gmail.com</a> 或 <a href="https://twitter.com/viperasi">@viperasi</a></p>
+	    <p>本系统使用bootstrap，web.py开发，使用GPL开源协议，代码请查看:<a href="https://github.com/viperasi/eftol">eftol on github</a></p>
+	  </div>
+	  <div class="modal-footer">
+	    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+	  </div>
+	</div>
+	<!-- about dialog end -->
+
+	<!-- alert dialog -->
+	<div class="alert" id="alertDlg" style="display:none;">
+	  <button type="button" class="close" data-dismiss="alert">&times;</button>
+	  <p id="alertContent"></p>
+	</div>
+	<!-- alert dialog end-->
+</body>
+</html>
