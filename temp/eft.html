@@ -1,3 +1,4 @@
+$def with (shipTypes, chrraces, ships, page)
 $var curr_page:eft
 <div class="container-fluid">
   <div class="row-fluid">
@@ -6,30 +7,97 @@ $var curr_page:eft
 		  <fieldset>
 		  	<legend>搜索</legend>
 		    <label>类型:</label>
-		    <select>
-			  <option>1</option>
-			  <option>2</option>
-			  <option>3</option>
-			  <option>4</option>
-			  <option>5</option>
+		    <select name="gid" class="span">
+			  <option value=-1>--请选择--</option>
+			  $for type in shipTypes:
+			  	<option value=$type.groupid>$type.groupname</option>
 			</select>
 			<label>种族:</label>
-		    <select>
-			  <option>1</option>
-			  <option>2</option>
-			  <option>3</option>
-			  <option>4</option>
-			  <option>5</option>
+		    <select name="cid" class="span">
+			  <option value=-1>--请选择--</option>
+			  $for race in chrraces:
+			  	<option value=$race.raceid>$race.racename</option>
 			</select>
 			<label>名称:</label>
-		    <input type="text" placeholder="名称">
+		    <input name="tname" type="text" class="span" placeholder="请输入名称">
 		    <button type="submit" class="btn">搜索</button>
 		  </fieldset>
 		</form>
     </div>
     <div class="span10">
-      <!--Body content-->
-      asdfasdfasdf
+      	<table class="table table-hover">
+			<thead>
+			    <tr>
+			      	<th class="span1">序号</th>
+			      	<th class="span4">名称</th>
+			      	<th class="span2">类型</th>
+			      	<th class="span2">种族</th>
+			      	<th class="span1">操作</th>
+			    </tr>
+			</thead>
+			<tbody>
+				$for i, ship in enumerate(ships):
+				    <tr>
+				      	<td>$(i+1)</td>
+				      	<td><a href="#" id="ship_$ship.typeid" class="shipModal">$ship.typename</a></td>
+				      	<td>$ship.groupname</td>
+				      	<td>$ship.racename</td>
+				      	<td>
+				      		<a href="/ceft/$ship.typeid">创建</a>
+				      	</td>
+				    </tr>
+			</tbody>
+		</table>
+		<div class="pagination pagination-centered">
+		  <ul>
+		  	$if int(page.currPage) == 1:
+		    	<li class="disabled"><a href="#">上一页</a></li>
+		    $else:
+		    	<li><a href="/eft/$(int(page.currPage)-1)">上一页</a></li>
+		    $for p in range(1, int(page.allPage)+1):
+		    	$if p == int(page.currPage):
+		    		<li class="active"><a href="#">$p</a></li>
+		    	$else:
+		    		<li><a href="/eft/$p">$p</a></li>
+		    $if int(page.currPage) == int(page.allPage):
+		    	<li class="disabled"><a href="#">下一页</a></li>
+		    $else:
+		    	<li><a href="/eft/$(int(page.currPage)+1)">下一页</a></li>
+		  </ul>
+		</div>
     </div>
   </div>
 </div>
+<script>
+	jq(function(){
+		jq(".shipModal").click(function(){
+			jq("#loading").modal();
+			var shipId = jq(this).attr("id").substring(5);
+			jq.ajax({
+				url:"/ship/"+shipId,
+				type:"GET",
+				success:function(resp){
+					jq("#shipLabel").empty().append(resp.name);
+					jq("#shipImg").attr('src','http://image.eve-online.com.cn/Render/' + resp.typeid + '_512.png');
+					jq("#ddShip").empty().append(resp.name);
+					jq("#ddGroup").empty().append(resp.group);
+					jq("#ddRace").empty().append(resp.race);
+					jq("#introduction").empty().append(resp.desc);
+					var propHtml = jq("<dl>").addClass("dl-horizontal");
+					jq.each(resp.prop, function(i,p){
+						propHtml.append(
+							jq("<dt>").append(p.displayname)
+						).append(
+							jq("<dd>").append(p.valueint ? p.valueint : p.valuefloat)
+						);
+					});
+					jq("#properties").empty().append(propHtml);
+					jq("#precondition").empty().append(resp.prec);
+					jq("#derivative").empty().append(resp.der);
+					jq("#shipModal").modal();
+					jq("#loading").modal("hide");
+				}
+			});
+		});
+	});
+</script>

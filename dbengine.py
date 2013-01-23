@@ -18,8 +18,8 @@ class DBEngine:
         self.dbn = 'mysql'
         self.user = 'eft'
         self.pw = 'eft'
-        self.db = 'eftol_db'
+        self.database = 'eftol_db'
 
     def getInstance(self):
-        self.db = web.database(dbn=self.dbn,user=self.user,pw=self.pw,db=self.db)
+        self.db = web.database(dbn=self.dbn,user=self.user,pw=self.pw,db=self.database)
         return self.db

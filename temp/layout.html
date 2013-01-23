@@ -14,6 +14,17 @@ $def with (content)
 	var jq = jQuery.noConflict();
 	jq(function()
 	{
+		jq.ajaxSetup({
+			type:'POST',
+			dataType:'json',
+			error:function(resp){
+				jq("#loginTgr").popover('hide');
+				jq("#alertContent").empty().append("服务器出错,请稍后再试.");
+				jq("#alertDlg").addClass("alert-error").show();		
+				jq('#loading').modal('hide');
+			}
+		});
+
 		jq("#loginTgr").popover({
 			title:"登录", 
 			html:true,
@@ -46,8 +57,6 @@ $def with (content)
 		}
 		jq.ajax({
 			url:'/login',
-			type:'POST',
-			dataType:'json',
 			data:{
 				email: email,
 				passwd: passwd,
@@ -58,14 +67,8 @@ $def with (content)
 				jq("#loginTgr").popover('hide');
 				jq("#alertContent").empty().append(data.succ?"登录成功":data.msg);
 				jq("#alertDlg").addClass(data.succ?"alert-success":"alert-error").show();
-			},
-			error:function(resp){
-				jq("#loginTgr").popover('hide');
-				jq("#alertContent").empty().append("服务器出错,请稍后再试.");
-				jq("#alertDlg").addClass("alert-error").show();				
 			}
-		})
-
+		});
 	}
 	</script>
 </head>
@@ -82,9 +85,9 @@ $def with (content)
 	      <li><a href="#"><i class="icon-user"></i>人物</a></li>
 	      <li class="divider-vertical"></li>
 	    	$if content.curr_page == 'eft':
-	    		<li class="active"><a href="/eft"><i class="icon-briefcase"></i>装配</a></li>
+	    		<li class="active"><a href="/eft/1"><i class="icon-briefcase"></i>装配</a></li>
 	    	$else:
-	    		<li><a href="/eft"><i class="icon-briefcase"></i>装配</a></li>
+	    		<li><a href="/eft/1"><i class="icon-briefcase"></i>装配</a></li>
 	      <li class="divider-vertical"></li>
 	      <li><a href="#"><i class="icon-shopping-cart"></i>市场</a></li>
 	    </ul>
@@ -112,7 +115,8 @@ $def with (content)
 	    <p>本系统使用bootstrap，web.py开发，使用GPL开源协议，代码请查看:<a href="https://github.com/viperasi/eftol" target="_blank">eftol on github</a></p>
 	  </div>
 	  <div class="modal-footer">
-	    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+	  	<a href="#" class="btn btn-primary">赞助</a>
+	    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
 	  </div>
 	</div>
 	<!-- about dialog end -->
@@ -122,5 +126,72 @@ $def with (content)
 	  <p id="alertContent"></p>
 	</div>
 	<!-- alert dialog end-->
+	<!-- loading dialog -->
+	<div id="loading" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="loadingLabel" aria-hidden="true">
+	  <div class="modal-header">
+	    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+	    <h3 id="loadingLabel">Loading...</h3>
+	  </div>
+	  <div class="modal-body">
+	    <p>loading...please wait...</p>
+	  </div>
+	  <div class="modal-footer">
+	    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+	  </div>
+	</div>
+	<!-- loading dialog end -->
+	<!-- ship dialog -->
+	<div id="shipModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="shipLabel" aria-hidden="true">
+	  <div class="modal-header">
+	    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+	    <h3 id="shipLabel">ship title</h3>
+	  </div>
+	  <div class="modal-body">
+	  	<div class="row">
+	      	<div class="span3"><img src="http://image.eve-online.com.cn//Render/582_512.png" class="img-polaroid" id="shipImg" /></div>
+	      	<div class="span3">
+	      		<dl>
+				  <dt>名称</dt>
+				  <dd id="ddShip">name  desc</dd>
+				  <dt>类型</dt>
+				  <dd id="ddGroup">group name  desc</dd>
+				  <dt>势力</dt>
+				  <dd id="ddRace">race  desc</dd>
+				</dl>
+	      	</div>
+      	</div>
+      	<div class="row">
+      		<div class="span6">
+	      		<div class="tabbable">
+				  <ul class="nav nav-tabs">
+				    <li class="active"><a href="#introduction" data-toggle="tab">介绍</a></li>
+				    <li><a href="#properties" data-toggle="tab">属性</a></li>
+					<li><a href="#precondition" data-toggle="tab">需求</a></li>
+					<li><a href="#derivative" data-toggle="tab">衍生</a></li>
+				  </ul>
+				  <div class="tab-content">
+				    <div class="tab-pane active" id="introduction" style="overflow:auto;">
+				    	<p>introduction</p>
+				    </div>
+				    <div class="tab-pane" id="properties">
+				      <p>properties</p>
+				    </div>
+				    <div class="tab-pane" id="precondition">
+				      <p>precondition</p>
+				    </div>
+				    <div class="tab-pane" id="derivative">
+				      <p>derivative</p>
+				    </div>
+				  </div>
+				</div>
+ 			</div>
+      	</div>
+	  </div>
+	  <div class="modal-footer">
+	  	<button class="btn btn-primary">创建</button>
+	    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+	  </div>
+	</div>
+	<!-- ship dialog end -->
 </body>
 </html>
