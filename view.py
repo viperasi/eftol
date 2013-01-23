@@ -91,7 +91,7 @@ class createEFT:
                                 ' and t33.keyid=c.raceid and t3.tablename="dbo.chrraces" and t3.columnName="racename" and t3.tcid=t33.tcid and t33.languageid="ZH"'+
                                 ' and t44.keyid=i.typeid and t4.tablename="dbo.invtypes" and t4.columnName="description" and t4.tcid=t44.tcid and t44.languageid="ZH"'+
                                 ' and i.typeid=$sid and i.groupid=g.groupid and c.raceid=i.raceid')
-        return render.ceft(ship)
+        return render.ceft(ship[0])
 
 class getShips:
     def GET(self):

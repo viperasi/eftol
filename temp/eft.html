@@ -94,6 +94,7 @@ $var curr_page:eft
 					jq("#properties").empty().append(propHtml);
 					jq("#precondition").empty().append(resp.prec);
 					jq("#derivative").empty().append(resp.der);
+					jq("#btnCreate").attr("href","/ceft/"+resp.typeid);
 					jq("#shipModal").modal();
 					jq("#loading").modal("hide");
 				}

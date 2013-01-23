@@ -1,13 +1,118 @@
 $def with (ship)
 $var curr_page:eft
-<button class="btn" onclick="history.go(-1)">back</button>
 <div class="container-fluid">
   <div class="row-fluid">
-    <div class="span2">
-      	tree
+    <div class="span4">
+      	<div class="accordion" id="propAccordion">
+      		<h4>$ship.name</h4>
+		  <div class="accordion-group">
+		    <div class="accordion-heading">
+		      <a class="accordion-toggle" data-toggle="collapse" data-parent="#propAccordion" href="#collapseOne">
+		        电容器
+		      </a>
+		    </div>
+		    <div id="collapseOne" class="accordion-body collapse in">
+		      <div class="accordion-inner">
+		        Anim pariatur cliche...
+		      </div>
+		    </div>
+		  </div>
+		  <div class="accordion-group">
+		    <div class="accordion-heading">
+		      <a class="accordion-toggle" data-toggle="collapse" data-parent="#propAccordion" href="#collapseTwo">
+		        攻击
+		      </a>
+		    </div>
+		    <div id="collapseTwo" class="accordion-body collapse">
+		      <div class="accordion-inner">
+		        Anim pariatur cliche...
+		      </div>
+		    </div>
+		  </div>
+		  <div class="accordion-group">
+		    <div class="accordion-heading">
+		      <a class="accordion-toggle" data-toggle="collapse" data-parent="#propAccordion" href="#collapseThree">
+		        防御
+		      </a>
+		    </div>
+		    <div id="collapseThree" class="accordion-body collapse">
+		      <div class="accordion-inner">
+		        Anim pariatur cliche...
+		      </div>
+		    </div>
+		  </div>
+		  <div class="accordion-group">
+		    <div class="accordion-heading">
+		      <a class="accordion-toggle" data-toggle="collapse" data-parent="#propAccordion" href="#collapseFour">
+		        目标锁定系统
+		      </a>
+		    </div>
+		    <div id="collapseFour" class="accordion-body collapse">
+		      <div class="accordion-inner">
+		        Anim pariatur cliche...
+		      </div>
+		    </div>
+		  </div>
+		  <div class="accordion-group">
+		    <div class="accordion-heading">
+		      <a class="accordion-toggle" data-toggle="collapse" data-parent="#propAccordion" href="#collapseFive">
+		        导航
+		      </a>
+		    </div>
+		    <div id="collapseFive" class="accordion-body collapse">
+		      <div class="accordion-inner">
+		        Anim pariatur cliche...
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		<button class="btn" onclick="history.go(-1)">back</button>
     </div>
-    <div class="span10">
-    	content
+    <div class="span8">
+    	<div class="row-fluid">
+    		<div class="span1">CPU:</div>
+    		<div class="span5">
+    			<div class="progress progress-info progress-striped active" id="pgCPU">
+				  <div class="bar" style="width: 100%;" id="barCPU"></div>
+				</div>
+    		</div>
+    		<div class="span1">栅格:</div>
+    		<div class="span5">
+    			<div class="progress progress-info progress-striped active" id="pgPG">
+				  <div class="bar" style="width: 100%;" id="barPG"></div>
+				</div>
+    		</div>
+    	</div>
+    	<div class="tabbable">
+		  <ul class="nav nav-tabs">
+		    <li class="active"><a href="#high" data-toggle="tab">高能量槽</a></li>
+		    <li><a href="#mid" data-toggle="tab">中能量槽</a></li>
+			<li><a href="#low" data-toggle="tab">低能量槽</a></li>
+			<li><a href="#change" data-toggle="tab">改装槽</a></li>
+			<li><a href="#drone" data-toggle="tab">无人机</a></li>
+			<li><a href="#subsys" data-toggle="tab">子系统</a></li>
+		  </ul>
+		  <div class="tab-content">
+		    <div class="tab-pane active" id="high" style="overflow:auto;">
+		    	<p>introduction</p>
+		    </div>
+		    <div class="tab-pane" id="mid">
+		      <p>properties</p>
+		    </div>
+		    <div class="tab-pane" id="low">
+		      <p>precondition</p>
+		    </div>
+		    <div class="tab-pane" id="change">
+		      <p>derivative</p>
+		    </div>
+		    <div class="tab-pane" id="drone">
+		      <p>derivative</p>
+		    </div>
+		    <div class="tab-pane" id="subsys">
+		      <p>derivative</p>
+		    </div>
+		  </div>
+		</div>
     </div>
   </div>
 </div>
