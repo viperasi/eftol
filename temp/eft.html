@@ -78,7 +78,7 @@ $var curr_page:eft
 				type:"GET",
 				success:function(resp){
 					jq("#shipLabel").empty().append(resp.name);
-					jq("#shipImg").attr('src','http://image.eve-online.com.cn/Render/' + resp.typeid + '_512.png');
+					jq("#shipImg").attr('src','http://image.eveonline.com/Render/' + resp.typeid + '_512.png');
 					jq("#ddShip").empty().append(resp.name);
 					jq("#ddGroup").empty().append(resp.group);
 					jq("#ddRace").empty().append(resp.race);
@@ -94,7 +94,7 @@ $var curr_page:eft
 					jq("#properties").empty().append(propHtml);
 					jq("#precondition").empty().append(resp.prec);
 					jq("#derivative").empty().append(resp.der);
-					jq("#btnCreate").attr("href","/ceft/"+resp.typeid);
+					jq("#btnCreate").attr("href","/ceft/" + resp.typeid);
 					jq("#shipModal").modal();
 					jq("#loading").modal("hide");
 				}
