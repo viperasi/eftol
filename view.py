@@ -67,7 +67,7 @@ class ship:
                         ['invtypes as i','dgmtypeattributes AS dt', 'dgmattributetypes d',
                         'trntranslationcolumns AS t1', 'trntranslations AS t11'],
                         vars = {'sid' : shipId},
-                        what = 't11.text AS displayname, dt.valueint, dt.valuefloat',
+                        what = 't11.text AS displayname, coalesce(dt.valueint, dt.valuefloat) as value',
                         where = 'i.typeid=629 AND dt.typeid=i.typeid AND d.attributeid=dt.attributeid'+
                                 ' AND t11.keyid=dt.attributeid AND t1.tablename="dbo.dgmattributetypes" AND t1.columnname="displayname" AND t1.tcid=t11.tcid AND t11.languageid="ZH"')
         shipJson = simplejson.dumps(ship[0])

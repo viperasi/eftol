@@ -88,7 +88,7 @@ $var curr_page:eft
 						propHtml.append(
 							jq("<dt>").append(p.displayname)
 						).append(
-							jq("<dd>").append(p.valueint ? p.valueint : p.valuefloat)
+							jq("<dd>").append(p.value)
 						);
 					});
 					jq("#properties").empty().append(propHtml);
