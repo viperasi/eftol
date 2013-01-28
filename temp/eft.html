@@ -1,9 +1,9 @@
-$def with (shipTypes, chrraces, ships, page)
+$def with (shipTypes, chrraces, ships, page, shipType, chrrace)
 $var curr_page:eft
 <div class="container-fluid">
   <div class="row-fluid">
     <div class="span2">
-      	<form>
+      	<form action="/eft/$page.currPage" method="POST">
 		  <fieldset>
 		  	<legend>搜索</legend>
 		    <label>类型:</label>
@@ -13,7 +13,7 @@ $var curr_page:eft
 			  	<option value=$type.groupid>$type.groupname</option>
 			</select>
 			<label>种族:</label>
-		    <select name="cid" class="span">
+		    <select name="rid" class="span">
 			  <option value=-1>--请选择--</option>
 			  $for race in chrraces:
 			  	<option value=$race.raceid>$race.racename</option>
@@ -85,11 +85,14 @@ $var curr_page:eft
 					jq("#introduction").empty().append(resp.desc);
 					var propHtml = jq("<dl>").addClass("dl-horizontal");
 					jq.each(resp.prop, function(i,p){
-						propHtml.append(
-							jq("<dt>").append(p.displayname)
-						).append(
-							jq("<dd>").append(p.value)
-						);
+						console.log(p);
+						if(p.value != 0){
+							propHtml.append(
+								jq("<dt>").append(p.displayname)
+							).append(
+								jq("<dd>").append(p.value)
+							);
+						}
 					});
 					jq("#properties").empty().append(propHtml);
 					jq("#precondition").empty().append(resp.prec);
