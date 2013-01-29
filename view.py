@@ -33,7 +33,11 @@ class index:
 
 class eft:
     def GET(self,currPage):
+        data = web.input(gid='-1', rid='-1', tname='')
+        print data
         db = DBEngine().getInstance()
+        if currPage == '':
+            currPage = '1'
         shipTypes = db.select(
                         ['invgroups', 'trntranslationcolumns', 'trntranslations'],
                         what = 'invgroups.groupid as groupid,trntranslations.text as groupname',
@@ -42,68 +46,38 @@ class eft:
                         ['chrraces', 'trntranslationcolumns', 'trntranslations'],
                         what='chrraces.raceid as raceid,trntranslations.text as racename',
                         where='trntranslations.keyid=chrraces.raceid and trntranslationcolumns.tablename="dbo.chrraces" AND trntranslationcolumns.columnName="racename" AND trntranslations.tcid=trntranslationcolumns.tcid and trntranslations.languageid="ZH"')
+        var = {}
+        where = ''
+        countWhere = ''
+        if data.gid != '-1':
+            var['gid'] = data.gid
+            where = where + ' and i.groupid=$gid '
+            countWhere = countWhere + ' and i.groupid=' + data.gid
+        if data.rid != '-1':
+            var['rid'] = data.rid
+            where = where + ' and i.raceid=$rid'
+            countWhere = countWhere + ' and i.raceid=' + data.rid
+        if data.tname != '':
+            var['tname'] = data.tname
+            where = where + ' and t11.text like "%$tname%"'
+            countWhere = countWhere + ' and t11.text like "%' + data.tname + '%"'
         offset = (int(currPage) - 1) * 10
         ships = db.select(
                         ['invtypes as i', 'trntranslationcolumns as t1', 'trntranslations as t11',
                         'invgroups as g', 'trntranslationcolumns as t2', 'trntranslations as t22',
                         'chrraces as c', 'trntranslationcolumns as t3', 'trntranslations as t33'],
+                        vars = var,
                         what = 'i.typeid,t11.text as typename,t22.text as groupname,t33.text as racename',
                         where = 't11.keyid=i.typeid and t1.tablename="dbo.invtypes" and t1.columnName="typename" and t1.tcid=t11.tcid and t11.languageid="ZH"'+
                                 ' and t22.keyid=g.groupid and t2.tablename="dbo.invgroups" and t2.columnName="groupname" and t2.tcid=t22.tcid and t22.languageid="ZH"'+
                                 ' and t33.keyid=c.raceid and t3.tablename="dbo.chrraces" and t3.columnName="racename" and t3.tcid=t33.tcid and t33.languageid="ZH"'+
-                                ' and g.categoryid=6 and i.groupid=g.groupid and c.raceid=i.raceid',
+                                ' and g.categoryid=6 and i.groupid=g.groupid and c.raceid=i.raceid' + where,
                         order = 'c.raceid,g.groupid,i.typeid',
                         limit = 10,
                         offset = offset)
-        sql = 'select count(1) as count from invtypes as i, invgroups as g, chrraces as c where g.categoryid=6 and i.groupid=g.groupid and c.raceid=i.raceid'
+        sql = 'select count(1) as count from invtypes as i, invgroups as g, chrraces as c, trntranslationcolumns as t1, trntranslations as t11 where t11.keyid=i.typeid and t1.tablename="dbo.invtypes" and t1.columnname="typename" and t1.tcid=t11.tcid and t11.languageid="ZH" and g.categoryid=6 and i.groupid=g.groupid and c.raceid=i.raceid' + countWhere
         page = Pagination(sql, 10, currPage).getInstance()
-        return render.eft(shipTypes, chrraces, ships, page, None, None)
-
-    def POST(self,currPage):
-        data = web.input(gid=None, rid=None, tname=None)
-        if data.gid == '-1' and data.rid == '-1' and data.tname == '':
-            raise web.seeother('/eft/'+currPage)
-        else:
-            db = DBEngine().getInstance()
-            shipTypes = db.select(
-                            ['invgroups', 'trntranslationcolumns', 'trntranslations'],
-                            what = 'invgroups.groupid as groupid,trntranslations.text as groupname',
-                            where = 'trntranslations.keyid=invgroups.groupid and trntranslationcolumns.tablename="dbo.invgroups" AND trntranslationcolumns.columnName="groupname" AND trntranslations.tcid=trntranslationcolumns.tcid and trntranslations.languageid="ZH" and invgroups.categoryid=6')
-            chrraces = db.select(
-                            ['chrraces', 'trntranslationcolumns', 'trntranslations'],
-                            what='chrraces.raceid as raceid,trntranslations.text as racename',
-                            where='trntranslations.keyid=chrraces.raceid and trntranslationcolumns.tablename="dbo.chrraces" AND trntranslationcolumns.columnName="racename" AND trntranslations.tcid=trntranslationcolumns.tcid and trntranslations.languageid="ZH"')
-            offset = (int(currPage) - 1) * 10
-            var = {}
-            where = ''
-            if data.gid != '-1':
-                var['gid'] = data.gid
-                where = where + ' and i.groupid=$gid '
-            if data.rid != '-1':
-                var['rid'] = data.rid
-                where = where + ' and i.raceid=$rid'
-            if data.tname != '':
-                var['tname'] = data.tname
-                where = where + ' and t11.text like "%$tname%"'
-            ships = db.select(
-                            ['invtypes as i', 'trntranslationcolumns as t1', 'trntranslations as t11',
-                            'invgroups as g', 'trntranslationcolumns as t2', 'trntranslations as t22',
-                            'chrraces as c', 'trntranslationcolumns as t3', 'trntranslations as t33'],
-                            vars = var,
-                            what = 'i.typeid,t11.text as typename,t22.text as groupname,t33.text as racename',
-                            where = 't11.keyid=i.typeid and t1.tablename="dbo.invtypes" and t1.columnName="typename" and t1.tcid=t11.tcid and t11.languageid="ZH"'+
-                                    ' and t22.keyid=g.groupid and t2.tablename="dbo.invgroups" and t2.columnName="groupname" and t2.tcid=t22.tcid and t22.languageid="ZH"'+
-                                    ' and t33.keyid=c.raceid and t3.tablename="dbo.chrraces" and t3.columnName="racename" and t3.tcid=t33.tcid and t33.languageid="ZH"'+
-                                    ' and g.categoryid=6 and i.groupid=g.groupid and c.raceid=i.raceid' + where,
-                            order = 'c.raceid,g.groupid,i.typeid',
-                            limit = 10,
-                            offset = offset)
-            sql = 'select count(1) as count from invtypes as i, invgroups as g, chrraces as c where g.categoryid=6 and i.groupid=g.groupid and c.raceid=i.raceid' + where
-            page = Pagination(sql, var, 10, currPage).getInstance()
-            return render.eft(shipTypes, chrraces, ships, page, shipType, chrrace)
-            print 'eft search'
-
-
+        return render.eft(shipTypes, chrraces, ships, page, data)
 
 class ship:
     def GET(self,shipId):

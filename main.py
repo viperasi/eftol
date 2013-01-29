@@ -14,7 +14,7 @@ from view import index, eft, ship, createEFT, login, getShips, getItemData
 
 urls = (
     '/', 'index',
-    '/eft/(\d+)', 'eft',
+    '/eft/(\d*)', 'eft',
     '/ship/(\d+)', 'ship',
     '/ceft/(\d+)', 'createEFT',
     '/login', 'login',

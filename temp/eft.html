@@ -1,25 +1,37 @@
-$def with (shipTypes, chrraces, ships, page, shipType, chrrace)
+$def with (shipTypes, chrraces, ships, page, searchData)
 $var curr_page:eft
+$def selif(v):
+	$if v == '-1':
+		<option selected=selected value=-1>--请选择--</option>
+	$else:
+		<option value=-1>--请选择--</option>
+
 <div class="container-fluid">
   <div class="row-fluid">
     <div class="span2">
-      	<form action="/eft/$page.currPage" method="POST">
+      	<form action="/eft/" method="GET">
 		  <fieldset>
 		  	<legend>搜索</legend>
 		    <label>类型:</label>
 		    <select name="gid" class="span">
-			  <option value=-1>--请选择--</option>
-			  $for type in shipTypes:
-			  	<option value=$type.groupid>$type.groupname</option>
+		    $:selif(searchData['gid'])
+			$for type in shipTypes:
+				$if searchData['gid'] == type.groupid:
+					<option selected=selected value=$type.groupid>$type.groupname</option>
+				$else:
+					<option value=$type.groupid>$type.groupname</option>
 			</select>
 			<label>种族:</label>
 		    <select name="rid" class="span">
-			  <option value=-1>--请选择--</option>
-			  $for race in chrraces:
-			  	<option value=$race.raceid>$race.racename</option>
+		    	$:selif(searchData['rid'])
+		    	$for race in chrraces:
+			  		$if searchData['rid'] == race.raceid:
+			  			<option selected=selected value=$race.raceid>$race.racename</option>
+			  		$else:
+			  			<option value=$race.raceid>$race.racename</option>
 			</select>
 			<label>名称:</label>
-		    <input name="tname" type="text" class="span" placeholder="请输入名称">
+		    <input name="tname" type="text" class="span" value="$searchData['tname']" placeholder="请输入名称">
 		    <button type="submit" class="btn">搜索</button>
 		  </fieldset>
 		</form>
@@ -53,16 +65,16 @@ $var curr_page:eft
 		  	$if int(page.currPage) == 1:
 		    	<li class="disabled"><a href="#">上一页</a></li>
 		    $else:
-		    	<li><a href="/eft/$(int(page.currPage)-1)">上一页</a></li>
+		    	<li><a href="/eft/$(int(page.currPage)-1)?gid=$searchData['gid']&rid=$searchData['rid']&tname=$searchData['tname']">上一页</a></li>
 		    $for p in range(1, int(page.allPage)+1):
 		    	$if p == int(page.currPage):
 		    		<li class="active"><a href="#">$p</a></li>
 		    	$else:
-		    		<li><a href="/eft/$p">$p</a></li>
+		    		<li><a href="/eft/$p?gid=$searchData['gid']&rid=$searchData['rid']&tname=$searchData['tname']">$p</a></li>
 		    $if int(page.currPage) == int(page.allPage):
 		    	<li class="disabled"><a href="#">下一页</a></li>
 		    $else:
-		    	<li><a href="/eft/$(int(page.currPage)+1)">下一页</a></li>
+		    	<li><a href="/eft/$(int(page.currPage)+1)?gid=$searchData['gid']&rid=$searchData['rid']&tname=$searchData['tname']">下一页</a></li>
 		  </ul>
 		</div>
     </div>
