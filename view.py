@@ -102,6 +102,9 @@ class ship:
                         what = 't11.text AS displayname,dt.attributeid, coalesce(dt.valuefloat,dt.valueint) as value , d.categoryid',
                         where = 'dt.typeid=$sid AND d.attributeid=dt.attributeid'+
                                 ' AND t11.keyid=dt.attributeid AND t1.tablename="dbo.dgmattributetypes" AND t1.columnname="displayname" AND t1.tcid=t11.tcid AND t11.languageid="ZH"')
+        for attrid in attr:
+            if attrid.attributeid == '182' or attrid.attributeid == '183' || attrid.attributeid == '184':
+                reqskills = db.select([])
         shipJson = simplejson.dumps(ship[0])
         attrJson = simplejson.dumps(attr.list())
         shipJson = simplejson.loads(shipJson)
