@@ -34,7 +34,7 @@ class index:
 class eft:
     def GET(self,currPage):
         data = web.input(gid='-1', rid='-1', tname='')
-        print data
+        web.header('Content-Type','text/html; charset=utf-8', unique=True)
         db = DBEngine().getInstance()
         if currPage == '':
             currPage = '1'
@@ -52,15 +52,12 @@ class eft:
         if data.gid != '-1':
             var['gid'] = data.gid
             where = where + ' and i.groupid=$gid '
-            countWhere = countWhere + ' and i.groupid=' + data.gid
         if data.rid != '-1':
             var['rid'] = data.rid
             where = where + ' and i.raceid=$rid'
-            countWhere = countWhere + ' and i.raceid=' + data.rid
         if data.tname != '':
-            var['tname'] = data.tname
-            where = where + ' and t11.text like "%$tname%"'
-            countWhere = countWhere + ' and t11.text like "%' + data.tname + '%"'
+            var['tname'] = '%' + data.tname + '%'
+            where = where + ' and t11.text like $tname'
         offset = (int(currPage) - 1) * 10
         ships = db.select(
                         ['invtypes as i', 'trntranslationcolumns as t1', 'trntranslations as t11',
@@ -75,13 +72,17 @@ class eft:
                         order = 'c.raceid,g.groupid,i.typeid',
                         limit = 10,
                         offset = offset)
-        sql = 'select count(1) as count from invtypes as i, invgroups as g, chrraces as c, trntranslationcolumns as t1, trntranslations as t11 where t11.keyid=i.typeid and t1.tablename="dbo.invtypes" and t1.columnname="typename" and t1.tcid=t11.tcid and t11.languageid="ZH" and g.categoryid=6 and i.groupid=g.groupid and c.raceid=i.raceid' + countWhere
-        page = Pagination(sql, 10, currPage).getInstance()
+        table = ['invtypes as i', 'invgroups as g', 'chrraces as c', 'trntranslationcolumns as t1', 'trntranslations as t11']
+        what = 'count(1) as count'
+        where = 't11.keyid=i.typeid and t1.tablename="dbo.invtypes" and t1.columnname="typename" and t1.tcid=t11.tcid and t11.languageid="ZH" and g.categoryid=6 and i.groupid=g.groupid and c.raceid=i.raceid ' + where
+        order = 'c.raceid,g.groupid,i.typeid'
+        page = Pagination(table, var, what, where, order, 10, currPage).getInstance()
         return render.eft(shipTypes, chrraces, ships, page, data)
 
 class ship:
     def GET(self,shipId):
         db =DBEngine().getInstance()
+        web.header('Content-Type','application/json; charset=utf-8', unique=True)
         ship = db.select(
                         ['invtypes as i', 'trntranslationcolumns as t1', 'trntranslations as t11',
                         'invgroups as g', 'trntranslationcolumns as t2', 'trntranslations as t22',
