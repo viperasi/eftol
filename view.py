@@ -102,13 +102,22 @@ class ship:
                         what = 't11.text AS displayname,dt.attributeid, coalesce(dt.valuefloat,dt.valueint) as value , d.categoryid',
                         where = 'dt.typeid=$sid AND d.attributeid=dt.attributeid'+
                                 ' AND t11.keyid=dt.attributeid AND t1.tablename="dbo.dgmattributetypes" AND t1.columnname="displayname" AND t1.tcid=t11.tcid AND t11.languageid="ZH"')
-        for attrid in attr:
-            if attrid.attributeid == '182' or attrid.attributeid == '183' || attrid.attributeid == '184':
-                reqskills = db.select([])
+        sql = '''select tt.text as skill, COALESCE(skillLevel.valueFloat, skillLevel.valueInt) AS requiredLevel, attr.attributeid,output.*
+                 from ( select prereqs(dgmtypeattributes.typeid) as id, @level as treelevel, @parent as parent, substr(@path,2) as path
+                     from ( select @start_with:=$typeid, @id:=@start_with,@level:=0,@parent:=0,@path:="" ) vars, dgmtypeattributes
+                     where @id is not null ) output inner join trntranslations as tt on tt.tcid=8 and tt.languageid="zh" and tt.keyid=output.id 
+                     INNER JOIN dgmtypeattributes AS attr ON attr.typeID = output.parent AND attr.attributeID IN (182,183,184,1285,1289,1290) AND COALESCE(attr.valueFloat, attr.valueInt) = output.id 
+                     INNER JOIN dgmtypeattributes AS skillLevel ON skillLevel.typeID = output.parent AND skillLevel.attributeID IN (277,278,279,1286,1287,1288) 
+                     where ( (attr.attributeID = 182 AND skillLevel.attributeID = 277) OR (attr.attributeID = 183 AND skillLevel.attributeID = 278) OR 
+                         (attr.attributeID = 184 AND skillLevel.attributeID = 279) OR (attr.attributeID = 1285 AND skillLevel.attributeID = 1286) OR 
+                         (attr.attributeID = 1289 AND skillLevel.attributeID = 1287) OR (attr.attributeID = 1290 AND skillLevel.attributeID = 1288))'''
+        skills = db.query(sql,vars={'typeid':shipId})
         shipJson = simplejson.dumps(ship[0])
         attrJson = simplejson.dumps(attr.list())
+        skillJson = simplejson.dumps(skills.list())
         shipJson = simplejson.loads(shipJson)
         shipJson['prop'] = simplejson.loads(attrJson)
+        shipJson['skills'] = simplejson.loads(skillJson)
         return simplejson.dumps(shipJson)
 
 class createEFT:

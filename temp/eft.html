@@ -149,7 +149,15 @@ $def selif(v):
 					});
 					jq("#properties").empty().append(propHtml);
 					jq("#fitting").empty().append(fitting);
-					jq("#precondition").empty().append(resp.prec);
+					prec = jq("<ul>");
+					jq.each(resp.prec,function(index,item){
+						if(item.requiredLevel == '1'){
+							prec.append(
+								jq("<li>").append(item.skill)
+							);
+						}
+					});
+					jq("#precondition").empty().append(prec);
 					jq("#derivative").empty().append(resp.der);
 					jq("#btnCreate").attr("href","/ceft/" + resp.typeid);
 					jq("#shipModal").modal();
