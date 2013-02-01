@@ -14,15 +14,19 @@ from dbengine import DBEngine
 
 class Pagination:
 
-    def __init__(self, sql, limit, currPage):
-        self.sql = sql
+    def __init__(self, table, var, what, where, order, limit, currPage):
+        self.table = table
+        self.var = var
+        self.what = what
+        self.where = where
         self.limit = limit
+        self.order = order
         self.currPage = currPage
         self.allPage = 0
 
     def getInstance(self):
         db = DBEngine().getInstance()
-        results = db.query(self.sql)
+        results = db.select(self.table, vars=self.var, what=self.what,where=self.where,order=self.order)
         count = results[0].count
         mod = int(count) % self.limit
         if mod == 0:

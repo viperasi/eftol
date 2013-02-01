@@ -34,7 +34,7 @@ class index:
 class eft:
     def GET(self,currPage):
         data = web.input(gid='-1', rid='-1', tname='')
-        print data
+        web.header('Content-Type','text/html; charset=utf-8', unique=True)
         db = DBEngine().getInstance()
         if currPage == '':
             currPage = '1'
@@ -52,15 +52,12 @@ class eft:
         if data.gid != '-1':
             var['gid'] = data.gid
             where = where + ' and i.groupid=$gid '
-            countWhere = countWhere + ' and i.groupid=' + data.gid
         if data.rid != '-1':
             var['rid'] = data.rid
             where = where + ' and i.raceid=$rid'
-            countWhere = countWhere + ' and i.raceid=' + data.rid
         if data.tname != '':
-            var['tname'] = data.tname
-            where = where + ' and t11.text like "%$tname%"'
-            countWhere = countWhere + ' and t11.text like "%' + data.tname + '%"'
+            var['tname'] = '%' + data.tname + '%'
+            where = where + ' and t11.text like $tname'
         offset = (int(currPage) - 1) * 10
         ships = db.select(
                         ['invtypes as i', 'trntranslationcolumns as t1', 'trntranslations as t11',
@@ -75,13 +72,17 @@ class eft:
                         order = 'c.raceid,g.groupid,i.typeid',
                         limit = 10,
                         offset = offset)
-        sql = 'select count(1) as count from invtypes as i, invgroups as g, chrraces as c, trntranslationcolumns as t1, trntranslations as t11 where t11.keyid=i.typeid and t1.tablename="dbo.invtypes" and t1.columnname="typename" and t1.tcid=t11.tcid and t11.languageid="ZH" and g.categoryid=6 and i.groupid=g.groupid and c.raceid=i.raceid' + countWhere
-        page = Pagination(sql, 10, currPage).getInstance()
+        table = ['invtypes as i', 'invgroups as g', 'chrraces as c', 'trntranslationcolumns as t1', 'trntranslations as t11']
+        what = 'count(1) as count'
+        where = 't11.keyid=i.typeid and t1.tablename="dbo.invtypes" and t1.columnname="typename" and t1.tcid=t11.tcid and t11.languageid="ZH" and g.categoryid=6 and i.groupid=g.groupid and c.raceid=i.raceid ' + where
+        order = 'c.raceid,g.groupid,i.typeid'
+        page = Pagination(table, var, what, where, order, 10, currPage).getInstance()
         return render.eft(shipTypes, chrraces, ships, page, data)
 
 class ship:
     def GET(self,shipId):
         db =DBEngine().getInstance()
+        web.header('Content-Type','application/json; charset=utf-8', unique=True)
         ship = db.select(
                         ['invtypes as i', 'trntranslationcolumns as t1', 'trntranslations as t11',
                         'invgroups as g', 'trntranslationcolumns as t2', 'trntranslations as t22',
@@ -100,11 +101,26 @@ class ship:
                         vars = {'sid' : shipId},
                         what = 't11.text AS displayname,dt.attributeid, coalesce(dt.valuefloat,dt.valueint) as value , d.categoryid',
                         where = 'dt.typeid=$sid AND d.attributeid=dt.attributeid'+
+                                ' and (dt.attributeID <> 182 AND dt.attributeID <> 277) AND (dt.attributeID <> 183 AND dt.attributeID <> 278) '+ 
+                                ' and (dt.attributeID <> 184 AND dt.attributeID <> 279) AND (dt.attributeID <> 1285 AND dt.attributeID <> 1286) '+ 
+                                ' and (dt.attributeID <> 1289 AND dt.attributeID <> 1287) AND (dt.attributeID <> 1290 AND dt.attributeID <> 1288)'+
                                 ' AND t11.keyid=dt.attributeid AND t1.tablename="dbo.dgmattributetypes" AND t1.columnname="displayname" AND t1.tcid=t11.tcid AND t11.languageid="ZH"')
+        sql = '''select tt.text as skill, COALESCE(skillLevel.valueFloat, skillLevel.valueInt) AS requiredLevel, attr.attributeid,output.*
+                 from ( select prereqs(dgmtypeattributes.typeid) as id, @level as treelevel, @parent as parent, substr(@path,2) as path
+                     from ( select @start_with:=$typeid, @id:=@start_with,@level:=0,@parent:=0,@path:="" ) vars, dgmtypeattributes
+                     where @id is not null ) output inner join trntranslations as tt on tt.tcid=8 and tt.languageid="zh" and tt.keyid=output.id 
+                     INNER JOIN dgmtypeattributes AS attr ON attr.typeID = output.parent AND attr.attributeID IN (182,183,184,1285,1289,1290) AND COALESCE(attr.valueFloat, attr.valueInt) = output.id 
+                     INNER JOIN dgmtypeattributes AS skillLevel ON skillLevel.typeID = output.parent AND skillLevel.attributeID IN (277,278,279,1286,1287,1288) 
+                     where ( (attr.attributeID = 182 AND skillLevel.attributeID = 277) OR (attr.attributeID = 183 AND skillLevel.attributeID = 278) OR 
+                         (attr.attributeID = 184 AND skillLevel.attributeID = 279) OR (attr.attributeID = 1285 AND skillLevel.attributeID = 1286) OR 
+                         (attr.attributeID = 1289 AND skillLevel.attributeID = 1287) OR (attr.attributeID = 1290 AND skillLevel.attributeID = 1288)) order by treelevel,attr.attributeid'''
+        skills = db.query(sql,vars={'typeid':shipId})
         shipJson = simplejson.dumps(ship[0])
         attrJson = simplejson.dumps(attr.list())
+        skillJson = simplejson.dumps(skills.list())
         shipJson = simplejson.loads(shipJson)
         shipJson['prop'] = simplejson.loads(attrJson)
+        shipJson['skills'] = simplejson.loads(skillJson)
         return simplejson.dumps(shipJson)
 
 class createEFT:

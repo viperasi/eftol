@@ -2,7 +2,7 @@ $def with (shipTypes, chrraces, ships, page, searchData)
 $var curr_page:eft
 $def selif(v):
 	$if v == '-1':
-		<option selected=selected value=-1>--请选择--</option>
+		<option selected="selected" value=-1>--请选择--</option>
 	$else:
 		<option value=-1>--请选择--</option>
 
@@ -16,19 +16,19 @@ $def selif(v):
 		    <select name="gid" class="span">
 		    $:selif(searchData['gid'])
 			$for type in shipTypes:
-				$if searchData['gid'] == type.groupid:
-					<option selected=selected value=$type.groupid>$type.groupname</option>
+				$if (int(searchData['gid']) == int(type.groupid)):
+					<option selected="selected" value="$type.groupid">$type.groupname</option>
 				$else:
-					<option value=$type.groupid>$type.groupname</option>
+					<option value="$type.groupid">$type.groupname</option>
 			</select>
 			<label>种族:</label>
 		    <select name="rid" class="span">
 		    	$:selif(searchData['rid'])
 		    	$for race in chrraces:
-			  		$if searchData['rid'] == race.raceid:
-			  			<option selected=selected value=$race.raceid>$race.racename</option>
+			  		$if int(searchData['rid']) == int(race.raceid):
+			  			<option selected="selected" value="$race.raceid">$race.racename</option>
 			  		$else:
-			  			<option value=$race.raceid>$race.racename</option>
+			  			<option value="$race.raceid">$race.racename</option>
 			</select>
 			<label>名称:</label>
 		    <input name="tname" type="text" class="span" value="$searchData['tname']" placeholder="请输入名称">
@@ -62,7 +62,7 @@ $def selif(v):
 		</table>
 		<div class="pagination pagination-centered">
 		  <ul>
-		  	$if int(page.currPage) == 1:
+		  	$if int(page.allPage) == 0 or int(page.currPage) == 1:
 		    	<li class="disabled"><a href="#">上一页</a></li>
 		    $else:
 		    	<li><a href="/eft/$(int(page.currPage)-1)?gid=$searchData['gid']&rid=$searchData['rid']&tname=$searchData['tname']">上一页</a></li>
@@ -71,7 +71,7 @@ $def selif(v):
 		    		<li class="active"><a href="#">$p</a></li>
 		    	$else:
 		    		<li><a href="/eft/$p?gid=$searchData['gid']&rid=$searchData['rid']&tname=$searchData['tname']">$p</a></li>
-		    $if int(page.currPage) == int(page.allPage):
+		    $if int(page.allPage) == 0 or int(page.currPage) == int(page.allPage):
 		    	<li class="disabled"><a href="#">下一页</a></li>
 		    $else:
 		    	<li><a href="/eft/$(int(page.currPage)+1)?gid=$searchData['gid']&rid=$searchData['rid']&tname=$searchData['tname']">下一页</a></li>
@@ -89,6 +89,7 @@ $def selif(v):
 				url:"/ship/"+shipId,
 				type:"GET",
 				success:function(resp){
+					console.log(resp);
 					jq("#shipLabel").empty().append(resp.name);
 					jq("#shipImg").attr('src','http://image.eveonline.com/Render/' + resp.typeid + '_512.png');
 					jq("#ddShip").empty().append(resp.name);
@@ -96,9 +97,49 @@ $def selif(v):
 					jq("#ddRace").empty().append(resp.race);
 					jq("#introduction").empty().append(resp.desc);
 					var propHtml = jq("<dl>").addClass("dl-horizontal");
+					var fitting = jq("<dl>").addClass("dl-horizontal");
 					jq.each(resp.prop, function(i,p){
-						console.log(p);
 						if(p.value != 0){
+							if(p.attributeid == '48'  //cpu
+								|| p.attributeid == '11'  //能量栅格
+								|| p.attributeid == '1132' //校准值
+								|| p.attributeid == '12' //低能量槽
+								|| p.attributeid == '13' //中能量槽
+								|| p.attributeid == '14' //高能量槽
+								|| p.attributeid == '101' //发射器安装数
+								|| p.attributeid == '102' //炮塔安装数
+								|| p.attributeid == '1154' //改装件安装数
+								){
+								fitting.append(
+									jq("<dt>").append(p.displayname)
+								).append(
+									jq("<dd>").append(p.value)
+								);
+							}else if(p.attributeid == '1547'){ //改装件尺寸
+								var v = '';
+								switch(p.value){
+									case '1':
+									v = '小';
+									break;
+									case '2':
+									v = '中';
+									break;
+									case '3':
+									v = '大';
+									break;
+									case '4':
+									v = '巨大';
+									break;
+									default:
+									v = '小';
+									break;
+								}
+								fitting.append(
+									jq("<dt>").append(p.displayname)
+								).append(
+									jq("<dd>").append(v)
+								);
+							}
 							propHtml.append(
 								jq("<dt>").append(p.displayname)
 							).append(
@@ -107,7 +148,9 @@ $def selif(v):
 						}
 					});
 					jq("#properties").empty().append(propHtml);
-					jq("#precondition").empty().append(resp.prec);
+					jq("#fitting").empty().append(fitting);
+					var prec = genSkillTree(resp.skills,null);
+					jq("#precondition").empty().append(prec);
 					jq("#derivative").empty().append(resp.der);
 					jq("#btnCreate").attr("href","/ceft/" + resp.typeid);
 					jq("#shipModal").modal();
@@ -116,4 +159,49 @@ $def selif(v):
 			});
 		});
 	});
+
+/*技能递归*/
+function genSkillTree(skills,parentId){
+	var prec = jq("<dl>");
+	jq.each(skills,function(index,item){
+		if(!parentId){
+			if(item.treelevel == 1){
+				var str = "";
+				if(item.attributeid == 182){
+					str = "主技能需求";
+				}else if(item.attributeid == 183){
+					str = "副技能需求";
+				}else if(item.attributeid == 184){
+					str = "三级技能需求";
+				}else if(item.attributeid == 1285){
+					str = "四级技能需求";
+				}else if(item.attributeid == 1289){
+					str = "五级技能需求";
+				}else if(item.attributeid == 1290){
+					str = "六级技能需求";
+				}
+				prec.append(
+					jq("<dt>").append(str).append(
+						jq("<dt>").append("<i class=\"icon-ok\"></i>").append(item.skill + '&nbsp;&nbsp;LV.' + item.requiredLevel)
+					).append(
+						jq("<dd>").append(
+							genSkillTree(skills,item.id)
+						)
+					)
+				);
+			}
+		}else{
+			if(item.parent == parentId){
+				prec.append(
+					jq("<dt>").append("&nbsp;".times(item.treelevel * 2)).append("<i class=\"icon-ok\"></i>").append(item.skill + '&nbsp;&nbsp;LV.' + item.requiredLevel)
+				).append(
+					jq("<dd>").append(
+						genSkillTree(skills,item.id)
+					)
+				);
+			}
+		}
+	});
+	return prec;
+}
 </script>
