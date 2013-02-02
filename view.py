@@ -105,7 +105,7 @@ class ship:
                                 ' and (dt.attributeID <> 184 AND dt.attributeID <> 279) AND (dt.attributeID <> 1285 AND dt.attributeID <> 1286) '+ 
                                 ' and (dt.attributeID <> 1289 AND dt.attributeID <> 1287) AND (dt.attributeID <> 1290 AND dt.attributeID <> 1288)'+
                                 ' AND t11.keyid=dt.attributeid AND t1.tablename="dbo.dgmattributetypes" AND t1.columnname="displayname" AND t1.tcid=t11.tcid AND t11.languageid="ZH"')
-        sql = '''select tt.text as skill, COALESCE(skillLevel.valueFloat, skillLevel.valueInt) AS requiredLevel, attr.attributeid,output.*
+        skillssql = '''select tt.text as skill, COALESCE(skillLevel.valueFloat, skillLevel.valueInt) AS requiredLevel, attr.attributeid,output.*
                  from ( select prereqs(dgmtypeattributes.typeid) as id, @level as treelevel, @parent as parent, substr(@path,2) as path
                      from ( select @start_with:=$typeid, @id:=@start_with,@level:=0,@parent:=0,@path:="" ) vars, dgmtypeattributes
                      where @id is not null ) output inner join trntranslations as tt on tt.tcid=8 and tt.languageid="zh" and tt.keyid=output.id 
@@ -114,7 +114,7 @@ class ship:
                      where ( (attr.attributeID = 182 AND skillLevel.attributeID = 277) OR (attr.attributeID = 183 AND skillLevel.attributeID = 278) OR 
                          (attr.attributeID = 184 AND skillLevel.attributeID = 279) OR (attr.attributeID = 1285 AND skillLevel.attributeID = 1286) OR 
                          (attr.attributeID = 1289 AND skillLevel.attributeID = 1287) OR (attr.attributeID = 1290 AND skillLevel.attributeID = 1288)) order by treelevel,attr.attributeid'''
-        skills = db.query(sql,vars={'typeid':shipId})
+        skills = db.query(skillssql,vars={'typeid':shipId})
         shipJson = simplejson.dumps(ship[0])
         attrJson = simplejson.dumps(attr.list())
         skillJson = simplejson.dumps(skills.list())
